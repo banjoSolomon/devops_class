@@ -1,0 +1,92 @@
+# Week 3 - Day 2: Ansible Playbook
+# Configures a server: installs Docker, deploys the app
+
+---
+- name: Configure web server and deploy app
+  hosts: webservers
+  become: true          # run as root (sudo)
+  vars:
+    app_name: devops-app
+    docker_image: "{{ lookup('env', 'DOCKER_IMAGE') | default('yourusername/devops-app:latest') }}"
+    app_port: 80
+    container_port: 5000
+
+  tasks:
+    # ── System updates ──────────────────────────────────
+    - name: Update apt cache
+      apt:
+        update_cache: true
+        cache_valid_time: 3600
+
+    - name: Install required packages
+      apt:
+        name:
+          - apt-transport-https
+          - ca-certificates
+          - curl
+          - gnupg
+          - lsb-release
+        state: present
+
+    # ── Install Docker ───────────────────────────────────
+    - name: Add Docker GPG key
+      apt_key:
+        url: https://download.docker.com/linux/ubuntu/gpg
+        state: present
+
+    - name: Add Docker repository
+      apt_repository:
+        repo: "deb [arch=amd64] https://download.docker.com/linux/ubuntu {{ ansible_distribution_release }} stable"
+        state: present
+
+    - name: Install Docker
+      apt:
+        name:
+          - docker-ce
+          - docker-ce-cli
+          - containerd.io
+        state: present
+      notify: Restart Docker
+
+    - name: Start and enable Docker
+      service:
+        name: docker
+        state: started
+        enabled: true
+
+    # ── Deploy App ───────────────────────────────────────
+    - name: Pull latest Docker image
+      docker_image:
+        name: "{{ docker_image }}"
+        source: pull
+        force_source: true
+
+    - name: Remove old container if exists
+      docker_container:
+        name: "{{ app_name }}"
+        state: absent
+      ignore_errors: true
+
+    - name: Run app container
+      docker_container:
+        name: "{{ app_name }}"
+        image: "{{ docker_image }}"
+        state: started
+        restart_policy: unless-stopped
+        ports:
+          - "{{ app_port }}:{{ container_port }}"
+        env:
+          APP_ENV: "production"
+
+    - name: Verify app is running
+      uri:
+        url: "http://localhost:{{ app_port }}/health"
+        status_code: 200
+      retries: 5
+      delay: 5
+
+  handlers:
+    - name: Restart Docker
+      service:
+        name: docker
+        state: restarted

@@ -1,0 +1,16 @@
+# Week 2 - Day 4: Kubernetes Service
+# Exposes the devops-app deployment
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: devops-app-service
+spec:
+  selector:
+    app: devops-app              # Matches the Deployment's pod labels
+  type: NodePort                 # Use LoadBalancer on cloud, NodePort for local
+  ports:
+    - protocol: TCP
+      port: 80                   # Service port
+      targetPort: 5000           # Container port
+      nodePort: 30080            # External port on the Node (local access)

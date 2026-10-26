@@ -1,0 +1,13 @@
+# Week 2 - Day 4: ConfigMap
+# Store non-sensitive configuration
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: app-config
+data:
+  db_host: "postgres-service"
+  db_port: "5432"
+  db_name: "devopsdb"
+  app_env: "production"
+  log_level: "info"

@@ -1,0 +1,30 @@
+# OS files
+.DS_Store
+Thumbs.db
+
+# Secrets - NEVER commit these
+.env
+.env.*
+*.key
+*.pem
+*.p12
+credentials.json
+
+# Dependencies
+node_modules/
+__pycache__/
+*.pyc
+*.pyo
+venv/
+.venv/
+
+# Build output
+dist/
+build/
+*.log
+*.tmp
+
+# IDE
+.vscode/
+.idea/
+*.swp

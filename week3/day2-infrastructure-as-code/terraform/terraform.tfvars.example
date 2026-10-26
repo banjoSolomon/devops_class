@@ -1,0 +1,10 @@
+# Copy this file to terraform.tfvars and fill in your values
+# DO NOT commit terraform.tfvars to Git — add it to .gitignore
+
+aws_region    = "us-east-1"
+app_name      = "devops-app"
+environment   = "staging"
+instance_type = "t3.micro"
+key_name      = "my-keypair"
+your_ip       = "0.0.0.0/0"   # replace with your actual IP
+docker_image  = "yourusername/devops-app:latest"
